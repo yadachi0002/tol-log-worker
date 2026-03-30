@@ -3,6 +3,6 @@ main = "worker.js"
 compatibility_date = "2026-03-30"
 
 kv_namespaces = [
-  { binding = "LOGS", id = "xxxxxx" }
+  { binding = "LOGS", id = "9561efcfb7954a8493ab971a22e312b6" }
 ]
 
