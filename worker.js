@@ -1,5 +1,7 @@
 export default {
   async fetch(request, env) {
+    await env.LOGS.put("debug-test", JSON.stringify({ ok: true }));
+
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
