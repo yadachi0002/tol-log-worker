@@ -1,3 +1,8 @@
 name = "tol-log-worker"
 main = "worker.js"
 compatibility_date = "2026-03-30"
+
+kv_namespaces = [
+  { binding = "LOGS", id = "xxxxxx" }
+]
+
