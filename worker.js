@@ -1,60 +1,53 @@
 export default {
   async fetch(request, env) {
-    // ✅ CORS headers
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
       "Access-Control-Allow-Methods": "POST, OPTIONS"
     };
 
-    // ✅ Handle preflight
+    console.log("REQUEST METHOD:", request.method);
+
     if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders
-      });
+      console.log("CORS PREFLIGHT RECEIVED");
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    // ✅ Enforce POST
     if (request.method !== "POST") {
-      return new Response("Method not allowed", {
-        status: 405,
-        headers: corsHeaders
-      });
+      console.log("NON-POST REJECTED");
+      return new Response("Method not allowed", { status: 405, headers: corsHeaders });
     }
 
-    // ✅ API key check
+    console.log("POST RECEIVED");
+
     const apiKey = request.headers.get("X-API-Key");
+    console.log("API KEY PRESENT:", !!apiKey);
+
     if (apiKey !== env.LOG_API_KEY) {
-      return new Response("Unauthorized", {
-        status: 401,
-        headers: corsHeaders
-      });
+      console.log("API KEY MISMATCH");
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
 
-    // ✅ Parse body
+    console.log("API KEY OK");
+
     let data;
     try {
       data = await request.json();
+      console.log("JSON PARSED");
     } catch {
-      return new Response("Invalid JSON", {
-        status: 400,
-        headers: corsHeaders
-      });
+      console.log("JSON PARSE FAILED");
+      return new Response("Invalid JSON", { status: 400, headers: corsHeaders });
     }
 
-    // ✅ KV write (awaited)
+    console.log("WRITING TO KV");
+
     await env.LOGS.put(
-      `${data.sessionId}:${crypto.randomUUID()}`,
-      JSON.stringify({
-        ...data,
-        receivedAt: new Date().toISOString()
-      })
+      "kv-final-proof",
+      JSON.stringify({ at: Date.now(), data })
     );
 
-    return new Response("OK", {
-      status: 200,
-      headers: corsHeaders
-    });
+    console.log("KV WRITE COMPLETE");
+
+    return new Response("OK", { status: 200, headers: corsHeaders });
   }
 };
