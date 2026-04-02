@@ -72,20 +72,21 @@ const rows = [];
 for (const entry of all) {
   const d = entry.data || {};
 
-  const baseRow = {
-    session_id: d.sessionId ?? "",
-    event: d.event ?? "",
-    at: entry.at ?? "",
-    section: d.section ?? "",
-    button_id: d.buttonId ?? "",
-    label: d.label ?? "",
-    ms_spent: d.ms_spent ?? "",
-    question: d.question ?? "",
-    correct: d.correct ?? "",
-    answer_raw: d.answer_raw ?? "",
-    verdict: d.verdict ?? "",
-    summary: d.summary ?? ""
-  };
+const baseRow = {
+  session_id: d.sessionId ?? "",
+  event: d.event ?? "",
+  at: entry.at ?? "",
+  timestamp: d.timestamp ?? "",
+  section: d.section ?? "",
+  button_id: d.buttonId ?? "",
+  label: d.label ?? "",
+  ms_spent: d.ms_spent ?? "",
+  question: d.question ?? "",
+  correct: d.correct ?? "",
+  answer_raw: d.answer_raw ?? "",
+  verdict: d.verdict ?? "",
+  summary: d.summary ?? ""
+};
 
   // ✅ If this event has criteria_feedback, expand rows
   if (Array.isArray(d.criteria_feedback) && d.criteria_feedback.length > 0) {
@@ -115,6 +116,7 @@ for (const entry of all) {
   "session_id",
   "event",
   "at",
+  "timestamp",
   "section",
   "button_id",
   "label",
