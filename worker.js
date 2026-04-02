@@ -45,6 +45,8 @@ var worker_default = {
         cursor = page.list_complete ? undefined : page.cursor;
       } while (cursor);
 
+      all.sort((a, b) => a.value.at - b.value.at);
+
       return new Response(JSON.stringify(all, null, 2), {
         status: 200,
         headers: {
