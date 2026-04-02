@@ -29,16 +29,61 @@ var worker_default = {
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
     };
     const url = new URL(request.url);
+
+    // ✅ STREAMING KV → CSV DOWNLOAD
+if (request.method === "GET" && url.pathname === "/download-kv") {
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      // CSV header
+      controller.enqueue(
+        encoder.encode("key,value\n")
+      );
+
+      let cursor;
+
+      do {
+        const page = await env.LOGS.list({ cursor, limit: 1000 });
+
+        for (const item of page.keys) {
+          const key = item.name;
+          const value = await env.LOGS.get(key, "text") || "";
+
+          const safeKey = key.replace(/"/g, '""');
+          const safeVal = value.replace(/"/g, '""');
+
+          controller.enqueue(
+            encoder.encode(`"${safeKey}","${safeVal}"\n`)
+          );
+        }
+
+        cursor = page.list_complete ? undefined : page.cursor;
+      } while (cursor);
+
+      controller.close();
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/csv",
+      "Content-Disposition": "attachment; filename=kv-export.csv"
+    }
+  });
+}
+// end added section
+    
     console.log("REQUEST METHOD:", request.method);
     if (request.method === "OPTIONS") {
       console.log("CORS PREFLIGHT RECEIVED");
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    if (request.method === "GET" && url.pathname === "/export-all-logs") {
+/*  if (request.method === "GET" && url.pathname === "/export-all-logs") {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*"
-  };
+  }; 
 
   const all = [];
   let cursor = undefined;
@@ -144,7 +189,8 @@ const baseRow = {
       ...corsHeaders
     }
   });
-}
+}    */
+    
     if (request.method !== "POST") {
       console.log("NON-POST REJECTED");
       return new Response("Method not allowed", { status: 405, headers: corsHeaders });
