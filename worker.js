@@ -85,7 +85,7 @@ const baseRow = {
   correct: d.correct ?? "",
   answer_raw: d.answer_raw ?? "",
   verdict: d.verdict ?? "",
-  summary: d.summary ?? ""
+  perhaps_you_meant: d.perhaps_you_meant ?? ""
 };
 
   // ✅ If this event has criteria_feedback, expand rows
@@ -125,7 +125,7 @@ const baseRow = {
   "correct",
   "answer_raw",
   "verdict",
-  "summary",
+  "perhaps_you_meant",
   "criterion",
   "met",
   "comment",
