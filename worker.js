@@ -1,21 +1,4 @@
 // worker.js
-
-// added helper function for download-csv
-function writeRow(controller, encoder, headers, row) {
-  const escaped = headers.map(h => {
-    const val = row[h] ?? "";
-    const s = String(val);
-    return /[",\n]/.test(s)
-      ? `"${s.replace(/"/g, '""')}"`
-      : s;
-  });
-
-  controller.enqueue(
-    encoder.encode(escaped.join(",") + "\n")
-  );
-}
-// end added helper function
-
 function csvEscape(value) {
   if (value === null || value === undefined) return "";
   const s = String(value);
@@ -45,110 +28,6 @@ var worker_default = {
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
     };
     const url = new URL(request.url);
-
-// ✅ STREAMING STRUCTURED KV → CSV EXPORT
-if (request.method === "GET" && url.pathname === "/download-csv") {
-  const encoder = new TextEncoder();
-
-  const headers = [
-    "session_id",
-    "event",
-    "at",
-    "timestamp",
-    "section",
-    "button_id",
-    "label",
-    "ms_spent",
-    "question",
-    "correct",
-    "answer_raw",
-    "verdict",
-    "summary",
-    "criterion",
-    "met",
-    "comment",
-    "next_step"
-  ];
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      // CSV header row
-      controller.enqueue(
-        encoder.encode(headers.join(",") + "\n")
-      );
-
-      let cursor;
-
-      do {
-        const page = await env.LOGS.list({ cursor, limit: 1000 });
-
-        for (const k of page.keys) {
-          const raw = await env.LOGS.get(k.name);
-          if (!raw) continue;
-
-          let parsed;
-          try {
-            parsed = JSON.parse(raw);
-          } catch {
-            continue;
-          }
-
-          const entry = parsed;
-          const d = entry.data || {};
-
-          const base = {
-            session_id: d.sessionId ?? "",
-            event: d.event ?? "",
-            at: entry.at ?? "",
-            timestamp: d.timestamp ?? "",
-            section: d.section ?? "",
-            button_id: d.buttonId ?? "",
-            label: d.label ?? "",
-            ms_spent: d.ms_spent ?? "",
-            question: d.question ?? "",
-            correct: d.correct ?? "",
-            answer_raw: d.answer_raw ?? "",
-            verdict: d.verdict ?? "",
-            summary: d.summary ?? ""
-          };
-
-          // Expand criteria if present
-          if (Array.isArray(d.criteria_feedback) && d.criteria_feedback.length > 0) {
-            for (const c of d.criteria_feedback) {
-              writeRow(controller, encoder, headers, {
-                ...base,
-                criterion: c.criterion ?? "",
-                met: c.met ?? "",
-                comment: c.comment ?? "",
-                next_step: d.next_step ?? ""
-              });
-            }
-          } else {
-            writeRow(controller, encoder, headers, {
-              ...base,
-              criterion: "",
-              met: "",
-              comment: "",
-              next_step: d.next_step ?? ""
-            });
-          }
-        }
-
-        cursor = page.list_complete ? undefined : page.cursor;
-      } while (cursor);
-
-      controller.close();
-    }
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=logs.csv"
-    }
-  });
-}
-    // end added section
     
     console.log("REQUEST METHOD:", request.method);
     if (request.method === "OPTIONS") {
@@ -156,7 +35,7 @@ if (request.method === "GET" && url.pathname === "/download-csv") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-/*  if (request.method === "GET" && url.pathname === "/export-all-logs") {
+if (request.method === "GET" && url.pathname === "/export-all-logs") {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*"
   }; 
@@ -265,7 +144,7 @@ const baseRow = {
       ...corsHeaders
     }
   });
-}    */
+} 
     
     if (request.method !== "POST") {
       console.log("NON-POST REJECTED");
