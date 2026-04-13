@@ -75,6 +75,7 @@ for (const entry of all) {
 const baseRow = {
   session_id: d.sessionId ?? "",
   event: d.event ?? "",
+  attempt: d.attempt ?? "",
   at: entry.at ?? "",
   timestamp: d.timestamp ?? "",
   section: d.section ?? "",
@@ -115,6 +116,7 @@ const baseRow = {
   const headers = [
   "session_id",
   "event",
+  "attempt",
   "at",
   "timestamp",
   "section",
