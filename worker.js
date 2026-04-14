@@ -36,6 +36,7 @@ var worker_default = {
     }
 
 if (request.method === "GET" && url.pathname === "/export-all-logs") {
+  const studyDayFilter = url.searchParams.get("study_day");
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*"
   }; 
@@ -73,16 +74,16 @@ if (request.method === "GET" && url.pathname === "/export-all-logs") {
 const rows = [];
 
 for (const entry of all) {
-  
-  // Filter by date if ?data=YYYY-MM-DD is provided
-  if (dateFilter) {
-    const logDate = new Date(entry.at).toISOString().slice(0, 10);
-    if (logDate !== dateFilter) continue;
-  }
   const d = entry.data || {};
+
+  // ✅ Filter by study day if provided
+  if (studyDayFilter && d.study_day !== studyDayFilter) {
+    continue;
+  }
 
 const baseRow = {
   session_id: d.sessionId ?? "",
+  study_day: d.study_day ?? "",
   event: d.event ?? "",
   attempt: d.attempt ?? "",
   at: entry.at ?? "",
@@ -124,6 +125,7 @@ const baseRow = {
   // 4. Define CSV column order
   const headers = [
   "session_id",
+  "study_day",
   "event",
   "attempt",
   "at",
