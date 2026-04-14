@@ -39,6 +39,9 @@ if (request.method === "GET" && url.pathname === "/export-all-logs") {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*"
   }; 
+  
+  // Optional data filter
+  const dateFilter = url.searchParams.get("date");
 
   const all = [];
   let cursor = undefined;
@@ -70,6 +73,12 @@ if (request.method === "GET" && url.pathname === "/export-all-logs") {
 const rows = [];
 
 for (const entry of all) {
+  
+  // Filter by date if ?data=YYYY-MM-DD is provided
+  if (dateFilter) {
+    const logDate = new Date(entry.at).toISOString().slice(0, 10);
+    if (logDate !== dateFilter) continue;
+  }
   const d = entry.data || {};
 
 const baseRow = {
