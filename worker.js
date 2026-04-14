@@ -40,9 +40,6 @@ if (request.method === "GET" && url.pathname === "/export-all-logs") {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*"
   }; 
-  
-  // Optional data filter
-  const dateFilter = url.searchParams.get("date");
 
   const all = [];
   let cursor = undefined;
