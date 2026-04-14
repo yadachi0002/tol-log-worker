@@ -73,49 +73,47 @@ const rows = [];
 for (const entry of all) {
   const d = entry.data || {};
 
-  // ✅ Filter by study day if provided
   if (studyDayFilter && d.study_day !== studyDayFilter) {
     continue;
   }
 
-const baseRow = {
-  session_id: d.sessionId ?? "",
-  study_day: d.study_day ?? "",
-  event: d.event ?? "",
-  audio_id: d.audio_id ?? "",
-  attempt: d.attempt ?? "",
-  at: entry.at ?? "",
-  timestamp: d.timestamp ?? "",
-  section: d.section ?? "",
-  button_id: d.buttonId ?? "",
-  label: d.label ?? "",
-  ms_spent: d.ms_spent ?? "",
-  question: d.question ?? "",
-  correct: d.correct ?? "",
-  answer_raw: d.answer_raw ?? "",
-  verdict: d.verdict ?? "",
-  perhaps_you_meant: d.perhaps_you_meant ?? ""
-};
+  // ✅ Create a baseRow that contains all top-level data
+  const baseRow = {
+    session_id: d.sessionId ?? "",
+    study_day: d.study_day ?? "",
+    event: d.event ?? "",
+    audio_id: d.audio_id ?? "",
+    attempt: d.attempt ?? "",
+    at: entry.at ?? "",
+    timestamp: d.timestamp ?? "",
+    section: d.section ?? "",
+    button_id: d.buttonId ?? "",
+    label: d.label ?? "",
+    ms_spent: d.ms_spent ?? "",
+    question: d.question ?? "",
+    correct: d.correct ?? "",
+    answer_raw: d.answer_raw ?? "",
+    verdict: d.verdict ?? "",
+    perhaps_you_meant: d.perhaps_you_meant ?? "",
+    next_step: d.next_step ?? "" // ✅ Captured here from the main data object
+  };
 
-  // ✅ If this event has criteria_feedback, expand rows
   if (Array.isArray(d.criteria_feedback) && d.criteria_feedback.length > 0) {
     for (const c of d.criteria_feedback) {
       rows.push({
         ...baseRow,
         criterion: c.criterion ?? "",
         met: c.met ?? "",
-        comment: c.comment ?? "",
-        next_step: d.next_step ?? ""
+        comment: c.comment ?? ""
       });
     }
   } else {
-    // ✅ Non-feedback or feedback without criteria
+    // ✅ Always push at least one row, even if there's no feedback array
     rows.push({
       ...baseRow,
       criterion: "",
       met: "",
-      comment: "",
-      next_step: d.next_step ?? ""
+      comment: ""
     });
   }
 }
